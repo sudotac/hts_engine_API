@@ -243,6 +243,7 @@ size_t HTS_ftell(HTS_File * fp)
    if (fp == NULL) {
       return 0;
    } else if (fp->type == HTS_FILE) {
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__APPLE__) || defined(__ANDROID__) || defined(__GLIBC__)
       fpos_t pos;
       fgetpos((FILE *) fp->pointer, &pos);
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__APPLE__) || defined(__ANDROID__)
@@ -250,6 +251,9 @@ size_t HTS_ftell(HTS_File * fp)
 #else
       return (size_t) pos.__pos;
 #endif                          /* _WIN32 || __CYGWIN__ || __APPLE__ || __ANDROID__ */
+#else
+      return (size_t) ftello((FILE *) fp->pointer);
+#endif                          /* _WIN32 || __CYGWIN__ || __APPLE__ || __ANDROID__ || __GLIBC__ */
    } else if (fp->type == HTS_DATA) {
       HTS_Data *d = (HTS_Data *) fp->pointer;
       return d->index;
